@@ -71,13 +71,13 @@ console.log(JSON.stringify(camps))
   def site_groups
     sites.map do |a| 
       website = JSON.parse(a.slice(a.index("[")..-3)).reject{|web| web.include?("facebook") || web.include?("twitter") || web.include?("youtube")} 
-      website.empty? ? [""] : website
+      # website.empty? ? [""] : website
     end
   end
 
   def clean_money
     clean(money.map.with_index do |m, idx|
-      if !clean_sites[idx].nil?
+      if !site_groups[idx].empty?
         m
       end
     end)
@@ -85,7 +85,7 @@ console.log(JSON.stringify(camps))
 
   def clean_camps
     clean(camps.map.with_index do |c, idx|
-      if !clean_sites[idx].nil?
+      if !site_groups[idx].empty?
         c
       end
     end).map(&:titleize)
