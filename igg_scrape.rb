@@ -69,7 +69,10 @@ console.log(JSON.stringify(camps))
   end
 
   def site_groups
-    sites.map { |a| JSON.parse(a.slice(a.index("[")..-3)).reject{|web| web.include?("facebook") || web.include?("twitter") || web.include?("youtube")} }
+    sites.map do |a| 
+      website = JSON.parse(a.slice(a.index("[")..-3)).reject{|web| web.include?("facebook") || web.include?("twitter") || web.include?("youtube")} 
+      website.empty? ? [""] : website
+    end
   end
 
   def clean_money
