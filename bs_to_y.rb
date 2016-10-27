@@ -12,7 +12,7 @@ class BStoY
   end
 
   def download
-    CSV.open( fd, 'w' ) do |writer|
+    CSV.open(fd, "w") do |writer|
       with_names.each do |i|
         writer << i
       end
@@ -48,10 +48,10 @@ class BStoY
             break
           end
           if gets.empty? && idx == max
-            if i.include?(".")
-              i.unshift(i.first.split(" ").first)
+            if o.include?(".")
+              i.unshift(i.first.split(".").first.titleize)
             else
-              i.unshift(i.first.split(" ").first(2).join(" "))
+              i.unshift(i.first.split(" ").first(2).join(" ").titleize)
             end
             break
           end
