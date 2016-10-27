@@ -3,7 +3,7 @@ require "csv"
 require "nokogiri"
 
 class KSScrape
-  attr_reader :urls, :sites, :backers, :money
+  attr_reader :urls, :sites, :backers, :money, :file
 
   def initialize(urls, file = 'ks_data.csv')
     @urls = urls

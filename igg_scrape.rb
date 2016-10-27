@@ -1,6 +1,7 @@
 require "csv"
 require "json"
 require "active_support/inflector"
+require "pry"
 
 class IGGScrape
   attr_reader :sites, :camps, :money, :file
@@ -14,16 +15,16 @@ class IGGScrape
 
   def self.js_script
     puts(<<-EOT)
-var cards = $(".ng-scope.ng-isolate-scope a”);
+var cards = $(".ng-scope.ng-isolate-scope a");
 
 var paths = [];
 $.each(cards, function() { paths.push($(this).attr("ng-href")) });
 
-var baseUrl = "https://www.indiegogo.com”;
+var baseUrl = "https://www.indiegogo.com";
 responses = [];
 $.each(paths, function() {
   var url = baseUrl + this;
-  responses.push($.ajax({ url: url, method: "GET", headers: {  'Access-Control-Allow-Origin':  }}))
+  responses.push($.ajax({ url: url, method: "GET", headers: {  'Access-Control-Allow-Origin': true }}))
 });
 
 strings = [];
@@ -68,12 +69,15 @@ console.log(JSON.stringify(camps))
   end
 
   def site_groups
-    sites.map { |a| JSON.parse(a.slice(a.index("[")..-3)) }
+    sites.map do |a| 
+      website = JSON.parse(a.slice(a.index("[")..-3)).reject{|web| web.include?("facebook") || web.include?("twitter") || web.include?("youtube")} 
+      # website.empty? ? [""] : website
+    end
   end
 
   def clean_money
     clean(money.map.with_index do |m, idx|
-      if !clean_sites[idx].nil?
+      if !site_groups[idx].empty?
         m
       end
     end)
@@ -81,7 +85,7 @@ console.log(JSON.stringify(camps))
 
   def clean_camps
     clean(camps.map.with_index do |c, idx|
-      if !clean_sites[idx].nil?
+      if !site_groups[idx].empty?
         c
       end
     end).map(&:titleize)
