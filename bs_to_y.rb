@@ -19,23 +19,40 @@ class BStoY
     end
   end
 
+  def includes?(sub_strings, string)
+    sub_strings.any? { |s| string.include?(s) }
+  end
+
+  def c_data(data)
+    data.map do |i|
+      i.compact.map.with_index do |o, idx|
+        unless includes?(["email", "domain", "example"], o)
+          o if (o.include?("@") || idx < 2)
+        end
+      end.compact
+    end[1..-1]
+  end
+
   def with_names
     data = CSV.read(fr)
-    c_data = data.map { |i| i.compact.map.with_index { |o, idx| o if (o.include?("@") || idx < 2) }.compact }[1..-1]
-    c_data.each do |i|
+    c_data(data).each do |i|
       max = i.count - 1
       i.each_with_index do |o, idx|
         gets = []
         if o.include?("@")
           try = o.split("@").first
-          puts try
           if names.include?(try.capitalize)
             i.unshift(try.capitalize)
+            i.insert(3, o)
             gets << "1"
             break
           end
           if gets.empty? && idx == max
-            i.unshift(i.first.split(" ").first(2).join(" "))
+            if i.include?(".")
+              i.unshift(i.first.split(" ").first)
+            else
+              i.unshift(i.first.split(" ").first(2).join(" "))
+            end
             break
           end
         end
