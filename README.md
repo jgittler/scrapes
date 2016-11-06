@@ -12,6 +12,7 @@ Clone Repo
 `load "./igg_scrape.rb"`
 
 `IGGScrape.js_script`
+
 Run js scripts to get data to set variables in pry
 
 `IGGScrape.new(sites, money, camps, file_name).download`
@@ -19,6 +20,7 @@ Run js scripts to get data to set variables in pry
 `load "./ks_scrape.rb"`
 
 `KSScrape.js_script`
+
 Run js scripts to get data to set variables in pry
 
 `KSScrape.new(urls, file_name).download`
@@ -26,24 +28,31 @@ Run js scripts to get data to set variables in pry
 `load "./insta_scrape.rb"`
 
 `InstaScrape.js_script`
+
 Run js scripts to get data to set variables in pry
 
 `i = InstaScrape.new(names, file_name)`
+
 To run requests
 
 `i.collect_all`
-To see success of run
+
+To see the success of the run
 
 `i.stats`
+
 If you want to download all the users without filtering them down, run this now
 
 `i.download`
+
 Then you can rename the file name to for the next download
 
 `i.file = "new_file.csv"`
+
 To see how many user qualify based on your filters
 
 `i.filtered_count`
+
 Now you can change your filters and see how many qualify after tweaks. Can also run `i.stats` again.
 
 Default filters are:
