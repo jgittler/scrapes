@@ -15,7 +15,6 @@ Clone Repo
 Run js scripts to get data to set variables in pry
 
 `IGGScrape.new(sites, money, camps, file_name).download`
-csv if file name should have data
 ### KS
 `load "./ks_scrape.rb"`
 
@@ -23,7 +22,6 @@ csv if file name should have data
 Run js scripts to get data to set variables in pry
 
 `KSScrape.new(urls, file_name).download`
-csv if file name should have data
 ### Insta
 `load "./insta_scrape.rb"`
 
@@ -40,6 +38,9 @@ To see success of run
 If you want to download all the users without filtering them down, run this now
 
 `i.download`
+Then you can rename the file name to for the next download
+
+`i.file = "new_file.csv"`
 To see how many user qualify based on your filters
 
 `i.filtered_count`
@@ -53,7 +54,6 @@ max_f = 80000
 All can be set after initialization
 ```
 ### To clean csv from BuzzStream for YAMM
-load "./bs_to_y.rb"
+`load "./bs_to_y.rb"`
 
-`BSToY.new(file_to_read, file_to_download).download
-csv if file name should have data
+`BSToY.new(file_to_read, file_to_download).download`
