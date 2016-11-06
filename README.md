@@ -66,3 +66,11 @@ All can be set after initialization
 `load "./bs_to_y.rb"`
 
 `BSToY.new(file_to_read, file_to_download).download`
+
+
+## BuzzStream
+To accept all the contacts run
+
+`$.each($(".btn.primary"), function() { $(this).click(); });`
+
+On each page per project
