@@ -5,8 +5,8 @@ require "pry"
 require "ostruct"
 
 class InstaScrape
-  attr_accessor :names, :file, :er_cut, :min_f, :max_f, :all, :rejected
-  attr_reader :errors, :initial
+  attr_accessor :names, :file, :er_cut, :min_f, :max_f, :all, :rejected, :refs, :filter_ref
+  attr_reader :errors, :initial, :unfiltered
 
   def initialize(names, file = "insta_data.csv")
     @names = names
@@ -16,6 +16,8 @@ class InstaScrape
     @min_f = 10000.0
     @max_f = 80000.0
     @rejected = ["clothing", "shop", "eyewear"]
+    @filter_ref = true
+    @refs = ["sunglass", "shades", "sunnie", "beach"]
     @errors = []
   end
 
@@ -25,9 +27,7 @@ class InstaScrape
 var jq = document.createElement('script');
 jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"; document.getElementsByTagName('head')[0].appendChild(jq);
 
-// add clean() function
-Array.prototype.clean = function(deleteValue) {
-  for (var i = 0; i < this.length; i++) {
+// add clean() function Array.prototype.clean = function(deleteValue) { for (var i = 0; i < this.length; i++) {
     if (this[i] == deleteValue) {         
       this.splice(i, 1);
       i--;
@@ -97,7 +97,14 @@ console.log(JSON.stringify(names.clean(null)))
           followers = hash.dig("user", "followed_by", "count")
           posts = hash.dig("user", "media", "nodes")
           avg_likes = posts.map {|i| i["likes"]["count"]}.reduce(:+) / posts.count.to_f rescue 1
-          { u: n, f: followers, er: (avg_likes / followers * 100).round(2) }
+          desc = hash.dig("user", "biography")
+          if !desc.nil?
+            email = desc.scan(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\b/i)
+          else
+            email = []
+          end
+          caps = hash.dig("user", "media", "nodes").map { |i| i.dig("caption") }
+          { u: n, f: followers, er: ((avg_likes / followers * 100).round(2) rescue 0.0), email: (email.empty? ? "" : email.first), caps: caps }
         else
           puts
           puts "missing profile page"
@@ -112,6 +119,21 @@ console.log(JSON.stringify(names.clean(null)))
         puts
         @errors << n
       end
+    end.reject { |a| a.class != Hash }
+
+    @unfiltered = @all
+  end
+
+  def add_ref(*arr)
+    @refs << arr
+    @refs.flatten!
+  end
+
+  def remove_ref(*arr)
+    refs.each do |r|
+      if [arr].flatten.include?(r)
+        @refs.delete(r)
+      end
     end
   end
 
@@ -119,7 +141,9 @@ console.log(JSON.stringify(names.clean(null)))
     puts
     puts "Total names: #{initial.count}"
     puts "Total clean names: #{initial.compact.count}"
-    puts "Filtered: #{all.count}"
+    puts "Total emails: #{unfiltered.select { |a| !a[:email].empty? }.count}"
+    puts "Filtered: #{all.count}" rescue ""
+    puts "Total filtered emails: #{all.select { |a| !a[:email].empty? }.count}"
     puts "Total error: #{errors.count}"
     puts
   end
@@ -129,20 +153,41 @@ console.log(JSON.stringify(names.clean(null)))
   end
 
   def filtered_count
-    filter(all).count
+    arr = filter(unfiltered)
+    puts arr
+    puts "-----------------"
+    puts "COUNT: #{arr.count}"
   end
 
   def filter!
-    @all = filter(all)
+    @all = filter(unfiltered)
   end
 
   def joined
-    all.compact.map { |a| [a[:u], a[:f], a[:er]] }
+    all.compact.map do |a|
+      [a[:u], a[:f], a[:er], a[:caps]]
+    end
   end
 
   private
 
-  def filter(all)
-    all.compact.reject {|i| i[:f] < min_f || i[:f] > max_f || i[:er] < er_cut }
+  def filter(arr)
+    arr = arr.compact
+    arr = arr.reject { |a| a.class != Hash }
+    arr = arr.reject {|i| i[:f] < min_f || i[:f] > max_f || i[:er] < er_cut }
+    if filter_ref
+      arr = arr.select do |a|
+        if a.has_key? :caps
+          a[:caps].any? do |p|
+            if !p.nil?
+              !p.scan(Regexp.new(refs.join("|"))).empty?
+            end
+          end
+        else
+          false
+        end
+      end
+    end
+    arr
   end
 end
