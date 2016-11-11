@@ -9,22 +9,22 @@ class InstaScrape
   attr_reader :errors, :initial, :unfiltered, :non_defaults
 
   def initialize(names, file = "insta_data.csv")
-    @names = names.uniq
-    @initial = names.uniq
+    @names = clean_names(names)
+    @initial = @names
     @file = file
-    @er_cut = 2.0
-    @min_f = 10000.0
+    @er_cut = 1.25
+    @min_f = 7000.0
     @max_f = 80000.0
-    @rejected = ["clothing", "shop", "eyewear", "sunglasses", "watches", "wallets"]
+    @rejected = ["clinic", "store", "apparel", "co.", "inc.", "collective", "clothing", "shop", "eyewear", "sunglasses", "watches", "wallets", "foundation"]
     @filter_ref = true
-    @refs = ["sunglass", "shades", "sunnie", "beach"]
+    @refs = ["eyecare", "charity", "eyewear", "sunglass", "shades", "sunnie", "fashion", "shop"]
     @non_defaults = [:@names, :@initial, :@errors, :@all, :@unfiltered, :@non_defaults]
     @errors = []
   end
 
   def defaults
     puts
-    instance_variables.reject {|o| non_defaults.include?(o) }.each { |o| puts "#{o.to_s.split('@').last}: #{instance_variable_get(o)}" }
+    instance_variables.reject { |v| non_defaults.include?(v) }.each { |v| puts "#{v.to_s.split('@').last}: #{instance_variable_get(v)}" }
     puts
   end
 
@@ -179,6 +179,16 @@ console.log(JSON.stringify(names.clean(null)))
   end
 
   private
+
+  def clean_names(names)
+    names.map do |n|
+      if n.include?("meta property")
+        n.split('"')[1]
+      else
+        n
+      end
+    end.uniq
+  end
 
   def filter(arr)
     arr = arr.compact
