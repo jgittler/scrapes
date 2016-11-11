@@ -6,28 +6,37 @@ require "ostruct"
 
 class InstaScrape
   attr_accessor :names, :file, :er_cut, :min_f, :max_f, :all, :rejected, :refs, :filter_ref
-  attr_reader :errors, :initial, :unfiltered
+  attr_reader :errors, :initial, :unfiltered, :non_defaults
 
   def initialize(names, file = "insta_data.csv")
-    @names = names
-    @initial = names
+    @names = names.uniq
+    @initial = names.uniq
     @file = file
     @er_cut = 2.0
     @min_f = 10000.0
     @max_f = 80000.0
-    @rejected = ["clothing", "shop", "eyewear"]
+    @rejected = ["clothing", "shop", "eyewear", "sunglasses", "watches", "wallets"]
     @filter_ref = true
     @refs = ["sunglass", "shades", "sunnie", "beach"]
+    @non_defaults = [:@names, :@initial, :@errors, :@all, :@unfiltered, :@non_defaults]
     @errors = []
+  end
+
+  def defaults
+    puts
+    instance_variables.reject {|o| non_defaults.include?(o) }.each { |o| puts "#{o.to_s.split('@').last}: #{instance_variable_get(o)}" }
+    puts
   end
 
   def self.js_script
     puts(<<-EOT)
 // adds jQuery
 var jq = document.createElement('script');
-jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"; document.getElementsByTagName('head')[0].appendChild(jq);
+jq.src = "https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js";
+document.getElementsByTagName('head')[0].appendChild(jq);
 
-// add clean() function Array.prototype.clean = function(deleteValue) { for (var i = 0; i < this.length; i++) {
+// add clean() function
+Array.prototype.clean = function(deleteValue) { for (var i = 0; i < this.length; i++) {
     if (this[i] == deleteValue) {         
       this.splice(i, 1);
       i--;
@@ -165,7 +174,7 @@ console.log(JSON.stringify(names.clean(null)))
 
   def joined
     all.compact.map do |a|
-      [a[:u], a[:f], a[:er], a[:caps]]
+      [a[:u], a[:f], a[:er], a[:email]]
     end
   end
 
