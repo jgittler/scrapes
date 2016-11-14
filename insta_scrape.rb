@@ -15,9 +15,9 @@ class InstaScrape
     @er_cut = 1.25
     @min_f = 7000.0
     @max_f = 80000.0
-    @rejected = ["clinic", "store", "apparel", "co.", "inc.", "collective", "clothing", "shop", "eyewear", "sunglasses", "watches", "wallets", "foundation"]
+    @rejected = ["clinic", "store", "apparel", "co.", "inc.", "collective", "clothing", "shop", "eyewear", "sunglasses", "watches", "wallets", "foundation", "magazine"]
     @filter_ref = true
-    @refs = ["eyecare", "charity", "eyewear", "sunglass", "shades", "sunnie", "fashion", "shop"]
+    @refs = ["outfit", "style", "eyecare", "charity", "eyewear", "sunglass", "shades", "sunnie", "fashion", "shop"]
     @non_defaults = [:@names, :@initial, :@errors, :@all, :@unfiltered, :@non_defaults]
     @errors = []
   end
