@@ -5,7 +5,7 @@ require "pry"
 require "ostruct"
 
 class InstaScrape
-  attr_accessor :names, :file, :er_cut, :min_f, :max_f, :all, :rejected, :refs, :filter_ref
+  attr_accessor :names, :file, :er_cut, :min_f, :max_f, :all, :rejected, :refs, :filter_ref, :ad_refs
   attr_reader :errors, :initial, :unfiltered, :non_defaults
 
   def initialize(names, file = "insta_data.csv")
@@ -17,6 +17,7 @@ class InstaScrape
     @max_f = 80000.0
     @rejected = ["clinic", "store", "apparel", "co.", "inc.", "collective", "clothing", "shop", "eyewear", "sunglasses", "watches", "wallets", "foundation", "magazine"]
     @filter_ref = true
+    @ad_refs = ["#ad", "#ads", "advertise", "promo", "collab"]
     @refs = ["outfit", "style", "eyecare", "charity", "eyewear", "sunglass", "shades", "sunnie", "fashion", "shop"]
     @non_defaults = [:@names, :@initial, :@errors, :@all, :@unfiltered, :@non_defaults]
     @errors = []
@@ -190,6 +191,10 @@ console.log(JSON.stringify(names.clean(null)))
     end.uniq
   end
 
+  def match_refs?(cap, refs)
+    !cap.scan(Regexp.new(refs.join("|"))).empty?
+  end
+
   def filter(arr)
     arr = arr.compact
     arr = arr.reject { |a| a.class != Hash }
@@ -197,9 +202,9 @@ console.log(JSON.stringify(names.clean(null)))
     if filter_ref
       arr = arr.select do |a|
         if a.has_key? :caps
-          a[:caps].any? do |p|
-            if !p.nil?
-              !p.scan(Regexp.new(refs.join("|"))).empty?
+          a[:caps].any? do |cap|
+            if !cap.nil?
+              match_refs?(cap, refs) && match_refs?(cap, ad_refs)
             end
           end
         else
